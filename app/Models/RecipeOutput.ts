@@ -5,11 +5,11 @@ export default class RecipeOutput extends BaseModel {
   public id: number
 
   @column()
-  public componentId: number
-
-  @column()
   public recipeId: number
 
   @column()
-  public count: number
+  public productId: number
+
+  @column()
+  public amount: number
 }

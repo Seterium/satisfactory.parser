@@ -1,4 +1,4 @@
-import { FGAbstractModel } from 'App/FGModels'
+import { FGAbstractModel, FGRecipeModel } from 'App/FGModels'
 import Component from 'App/Models/Component'
 
 import Fuel from 'App/Models/Fuel'
@@ -18,17 +18,24 @@ interface FuelData {
 }
 
 export class FGGeneratorModel extends FGAbstractModel {
-  private buildDecs: Record<string, any>[] = []
+  private buildDecs: Record<string, any>[]
 
   private fuelsDescs: Record<string, any>[]
 
-  constructor(generatorJsonData: Record<string, any>, fuelsDescs: Record<string, any>[]) {
+  private recipesDescs: Record<string, any>[]
+
+  constructor(
+    generatorJsonData: Record<string, any>,
+    fuelsDescs: Record<string, any>[],
+    recipesDescs: Record<string, any>[],
+  ) {
     super(generatorJsonData)
     this.buildDecs = this.getFModelBuildDesc()
     this.fuelsDescs = fuelsDescs
+    this.recipesDescs = recipesDescs
   }
 
-  get icon() {
+  protected get icon() {
     const iconPath = this.fmodelData[1].Properties?.mPersistentBigIcon?.ObjectPath
 
     if (typeof iconPath !== 'string') {
@@ -38,7 +45,7 @@ export class FGGeneratorModel extends FGAbstractModel {
     return iconPath.replace('.0', '')
   }
 
-  get nameLocaleKey() {
+  protected get nameLocaleKey() {
     const buildDescWithDisplayNameProperty = this.buildDecs.find((buildDesc) => {
       const type = `Build_${this.cleanedClassName}_C`
 
@@ -54,7 +61,7 @@ export class FGGeneratorModel extends FGAbstractModel {
     return buildDescWithDisplayNameProperty.Properties.mDisplayName.Key
   }
 
-  get power() {
+  private get power() {
     const buildDescWithPowerProperty = this.buildDecs.find((buildDesc) => {
       const type = `Build_${this.cleanedClassName}_C`
 
@@ -70,20 +77,8 @@ export class FGGeneratorModel extends FGAbstractModel {
     return buildDescWithPowerProperty.Properties.mPowerProduction
   }
 
-  async save() {
-    const model = new Generator()
-
-    model.class = this.docsJsonData.ClassName
-    model.nameLocaleId = await this.saveLocale(this.nameLocaleKey)
-    model.icon = this.icon
-    model.power = this.power
-    model.waterConsumption = this.waterConsumption
-
-    await model.save()
-
-    await this.saveFuels(model.id)
-
-    consola.success(`Generator with class ${chalk.bold.cyanBright(this.cleanedClassName)} saved`)
+  protected get cleanedClassName() {
+    return this.unsuffixedClassName.substring(6)
   }
 
   private get waterConsumption() {
@@ -125,10 +120,6 @@ export class FGGeneratorModel extends FGAbstractModel {
     }))
   }
 
-  protected get cleanedClassName() {
-    return this.unsuffixedClassName.substring(6)
-  }
-
   private async saveFuels(generatorId: number) {
     const fuelsData = this.fuels
 
@@ -167,6 +158,37 @@ export class FGGeneratorModel extends FGAbstractModel {
     }
   }
 
+  private async saveRecipe() {
+    const recipeJsonData = this.recipesDescs.find(({ ClassName }) => ClassName === `Recipe_${this.cleanedClassName}_C`)
+
+    if (recipeJsonData === undefined) {
+      throw new Error(`Could not find recipe for ${this.cleanedClassName}`)
+    }
+
+    const recipeModel = new FGRecipeModel(recipeJsonData)
+
+    const recipeId = await recipeModel.save(false)
+
+    return recipeId
+  }
+
+  async save() {
+    const model = new Generator()
+
+    model.class = this.docsJsonData.ClassName
+    model.nameLocaleId = await this.saveLocale(this.nameLocaleKey)
+    model.recipeId = await this.saveRecipe()
+    model.icon = this.icon
+    model.power = this.power
+    model.waterConsumption = this.waterConsumption
+
+    await model.save()
+
+    await this.saveFuels(model.id)
+
+    consola.success(`Generator with class ${chalk.bold.cyanBright(this.docsJsonData.ClassName)} saved`)
+  }
+
   static async truncateAll() {
     await FGGeneratorModel.truncate(Fuel)
     await FGGeneratorModel.truncate(Generator)
@@ -191,10 +213,14 @@ export class FGGeneratorModel extends FGAbstractModel {
       'FGItemDescriptor',
     ])
 
+    const recipesJsonData = FGGeneratorModel.getDocsJsonDescriptors([
+      'FGRecipe',
+    ])
+
     await FGGeneratorModel.truncateAll()
 
     for (const generatorJsonData of generatorsJsonData) {
-      const model = new this(generatorJsonData, fuelsJsonData)
+      const model = new this(generatorJsonData, fuelsJsonData, recipesJsonData)
 
       await model.save()
     }

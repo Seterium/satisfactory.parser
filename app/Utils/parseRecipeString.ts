@@ -1,4 +1,4 @@
-export function parseRecipeIngredients(recipeString: string) {
+export function parseRecipeString(recipeString: string) {
   return recipeString.split('),').map((part) => {
     const [itemClass, amount] = part.replace(/\(|\)/g, '').split(',')
 

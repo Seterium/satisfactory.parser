@@ -34,10 +34,12 @@ export abstract class FGAbstractModel {
 
   protected fmodelData: Record<string, any>
 
-  constructor(data: Record<string, any>) {
+  constructor(data: Record<string, any>, loadFModelData = true) {
     this.docsJsonData = data
 
-    this.fmodelData = this.getFModelDesc()
+    if (loadFModelData) {
+      this.fmodelData = this.getFModelDesc()
+    }
   }
 
   private getFModelDesc() {

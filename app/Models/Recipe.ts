@@ -19,16 +19,16 @@ export default class Recipe extends BaseModel {
   public class: string
 
   @column()
-  public nameLocale: string
+  public nameLocaleId: number | null
 
   @column()
   public isAlt: boolean
 
   @column()
-  public buildingId: number
+  public manufacturerId: number | null
 
   @column()
-  public duration: number
+  public duration: number | null
 
   @hasMany(() => RecipeInput)
   public inputs: HasMany<typeof RecipeInput>

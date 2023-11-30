@@ -9,6 +9,7 @@ import {
 
 import Locale from './Locale'
 import Fuel from './Fuel'
+import Recipe from './Recipe'
 
 export default class Generator extends BaseModel {
   @column({ isPrimary: true })
@@ -19,6 +20,9 @@ export default class Generator extends BaseModel {
 
   @column()
   public nameLocaleId: number
+
+  @column()
+  public recipeId: number
 
   @column()
   public icon: string
@@ -33,5 +37,8 @@ export default class Generator extends BaseModel {
   public name: HasOne<typeof Locale>
 
   @hasMany(() => Fuel)
-  public fuel: HasMany<typeof Fuel>
+  public fuels: HasMany<typeof Fuel>
+
+  @hasOne(() => Recipe)
+  public recipe: HasOne<typeof Recipe>
 }

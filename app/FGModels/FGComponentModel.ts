@@ -29,7 +29,7 @@ export class FGComponentModel extends FGAbstractModel {
 
     await componentModel.save()
 
-    consola.success(`Component with class ${chalk.bold.cyanBright(this.cleanedClassName)} saved`)
+    consola.success(`Component with class ${chalk.bold.cyanBright(this.docsJsonData.ClassName)} saved`)
   }
 
   static async parseDocsJson() {

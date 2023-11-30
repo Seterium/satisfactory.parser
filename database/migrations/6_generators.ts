@@ -8,6 +8,7 @@ export default class extends BaseSchema {
       table.increments('id').primary()
       table.string('class').notNullable().unique()
       table.integer('name_locale_id').unsigned().references('locales.id').onDelete('CASCADE')
+      table.integer('recipe_id').unsigned().references('recipes.id').onDelete('CASCADE')
       table.string('icon').notNullable()
       table.integer('water_consumption').notNullable()
       table.integer('power').notNullable()
