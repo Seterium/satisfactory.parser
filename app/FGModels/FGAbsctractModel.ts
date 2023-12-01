@@ -5,7 +5,6 @@ import fs from 'fs'
 import Env from '@ioc:Adonis/Core/Env'
 import Database from '@ioc:Adonis/Lucid/Database'
 
-import Locale from 'App/Models/Locale'
 import Component from 'App/Models/Component'
 import Extractor from 'App/Models/Extractor'
 import Fuel from 'App/Models/Fuel'
@@ -42,11 +41,15 @@ export abstract class FGAbstractModel {
     }
   }
 
-  private getFModelDesc() {
-    const filepath = globSync(`${Env.get('FG_FMODEL_EXPORTS_PATH')}/**/Desc_${this.cleanedClassName}.json`).pop()
+  protected getFModelDesc() {
+    let filepath = globSync(`${Env.get('FG_FMODEL_EXPORTS_PATH')}/**/Desc_${this.cleanedClassName}.json`).pop()
 
     if (filepath === undefined) {
-      throw new Error(`Could not find ${this.cleanedClassName} desc class data in FModel exports`)
+      filepath = globSync(`${Env.get('FG_FMODEL_EXPORTS_PATH')}/**/BP_${this.cleanedClassName}.json`).pop()
+    }
+
+    if (filepath === undefined) {
+      throw new Error(`Could not find ${this.docsJsonData.ClassName} (${this.cleanedClassName}) desc class data in FModel exports`)
     }
 
     const fmodelData: Record<string, any>[] = JSON.parse(fs.readFileSync(filepath).toString())
@@ -58,7 +61,23 @@ export abstract class FGAbstractModel {
     const filepath = globSync(`${Env.get('FG_FMODEL_EXPORTS_PATH')}/**/Build_${this.cleanedClassName}.json`).pop()
 
     if (filepath === undefined) {
-      throw new Error(`Could not find ${this.cleanedClassName} build class data in FModel exports`)
+      throw new Error(`Could not find ${this.docsJsonData.ClassName} build class data in FModel exports`)
+    }
+
+    const fmodelData: Record<string, any>[] = JSON.parse(fs.readFileSync(filepath).toString())
+
+    return fmodelData
+  }
+
+  protected getFModelRecipeDesc() {
+    const className = this.cleanedClassName.startsWith('e_')
+      ? this.cleanedClassName.substring(2)
+      : this.cleanedClassName
+
+    const filepath = globSync(`${Env.get('FG_FMODEL_EXPORTS_PATH')}/**/Recipe_${className}.json`).pop()
+
+    if (filepath === undefined) {
+      throw new Error(`Could not find ${this.docsJsonData.ClassName} (Recipe_${className}) recipe class data in FModel exports`)
     }
 
     const fmodelData: Record<string, any>[] = JSON.parse(fs.readFileSync(filepath).toString())
@@ -70,25 +89,49 @@ export abstract class FGAbstractModel {
     return this.docsJsonData.ClassName.slice(0, -2)
   }
 
-  protected get cleanedClassName() {
-    return this.unsuffixedClassName.substring(5)
+  protected get cleanedClassName(): string {
+    if (this.unsuffixedClassName.startsWith('Desc_')) {
+      return this.unsuffixedClassName.substring(5)
+    }
+
+    if (this.unsuffixedClassName.startsWith('Build_')) {
+      return this.unsuffixedClassName.substring(6)
+    }
+
+    if (this.unsuffixedClassName.startsWith('Recipe_')) {
+      return this.unsuffixedClassName.substring(7)
+    }
+
+    if (this.unsuffixedClassName.startsWith('BP_')) {
+      return this.unsuffixedClassName.substring(3)
+    }
+
+    return this.unsuffixedClassName
   }
 
   protected get nameLocaleKey(): string {
-    const nameLoc = this.fmodelData[1].Properties?.mDisplayName?.Key
+    // console.log('-------------------------')
+    // console.log(JSON.stringify(this.fmodelData, null, 2))
+    // console.log('-------------------------')
 
-    if (typeof nameLoc !== 'string') {
-      throw new Error(`Could not find mDisplayName.Key in ${this.cleanedClassName} fmodel data`)
+    const nameLocaleKey = this.fmodelData.find((fmodelData) => {
+      return fmodelData.Properties?.mDisplayName?.Key
+    })?.Properties?.mDisplayName?.Key
+
+    if (typeof nameLocaleKey !== 'string') {
+      throw new Error(`Could not find mDisplayName.Key in ${this.docsJsonData.ClassName} fmodel data`)
     }
 
-    return nameLoc
+    return nameLocaleKey
   }
 
   protected get icon(): string {
-    const iconPath = this.fmodelData[1].Properties?.mPersistentBigIcon?.ObjectPath
+    const iconPath = this.fmodelData.find((fmodelData) => {
+      return fmodelData.Properties?.mPersistentBigIcon?.ObjectPath
+    })?.Properties?.mPersistentBigIcon?.ObjectPath
 
     if (typeof iconPath !== 'string') {
-      throw new Error(`Could not find icon for ${this.cleanedClassName}`)
+      throw new Error(`Could not find icon for ${this.docsJsonData.ClassName}`)
     }
 
     return iconPath.replace('.0', '')
@@ -106,22 +149,6 @@ export abstract class FGAbstractModel {
     await db.rawQuery(`ALTER TABLE ${model.table} AUTO_INCREMENT=1;`)
 
     consola.success(`${chalk.bold.cyanBright(model.table)} table truncating completed`)
-  }
-
-  protected async saveLocale(localeKey: string): Promise<number> {
-    const existed = await Locale.findBy('key', localeKey)
-
-    if (existed !== null) {
-      return existed.id
-    }
-
-    const model = new Locale()
-
-    model.key = localeKey
-
-    await model.save()
-
-    return model.id
   }
 
   protected static getDocsJsonDescriptors(descriptors: string[]) {

@@ -1,4 +1,4 @@
-import { FGAbstractModel, FGRecipeModel } from 'App/FGModels'
+import { FGAbstractModel, FGBlueprintModel } from 'App/FGModels'
 import Component from 'App/Models/Component'
 
 import Fuel from 'App/Models/Fuel'
@@ -75,10 +75,6 @@ export class FGGeneratorModel extends FGAbstractModel {
     }
 
     return buildDescWithPowerProperty.Properties.mPowerProduction
-  }
-
-  protected get cleanedClassName() {
-    return this.unsuffixedClassName.substring(6)
   }
 
   private get waterConsumption() {
@@ -158,26 +154,26 @@ export class FGGeneratorModel extends FGAbstractModel {
     }
   }
 
-  private async saveRecipe() {
-    const recipeJsonData = this.recipesDescs.find(({ ClassName }) => ClassName === `Recipe_${this.cleanedClassName}_C`)
+  private async saveBlueprint() {
+    const blueprintJsonData = this.recipesDescs.find(({ ClassName }) => ClassName === `Recipe_${this.cleanedClassName}_C`)
 
-    if (recipeJsonData === undefined) {
-      throw new Error(`Could not find recipe for ${this.cleanedClassName}`)
+    if (blueprintJsonData === undefined) {
+      throw new Error(`Could not find recipe for ${this.docsJsonData.ClassName}`)
     }
 
-    const recipeModel = new FGRecipeModel(recipeJsonData)
+    const blueprintModel = new FGBlueprintModel(blueprintJsonData)
 
-    const recipeId = await recipeModel.save(false)
+    const blueprintId = await blueprintModel.save()
 
-    return recipeId
+    return blueprintId
   }
 
   async save() {
     const model = new Generator()
 
     model.class = this.docsJsonData.ClassName
-    model.nameLocaleId = await this.saveLocale(this.nameLocaleKey)
-    model.recipeId = await this.saveRecipe()
+    model.nameLocaleKey = this.nameLocaleKey
+    model.blueprintId = await this.saveBlueprint()
     model.icon = this.icon
     model.power = this.power
     model.waterConsumption = this.waterConsumption
@@ -186,7 +182,7 @@ export class FGGeneratorModel extends FGAbstractModel {
 
     await this.saveFuels(model.id)
 
-    consola.success(`Generator with class ${chalk.bold.cyanBright(this.docsJsonData.ClassName)} saved`)
+    consola.success(`Generator ${chalk.bold.cyanBright(this.docsJsonData.ClassName)} saved`)
   }
 
   static async truncateAll() {

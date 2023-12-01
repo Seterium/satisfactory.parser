@@ -7,8 +7,9 @@ export default class extends BaseSchema {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id').primary()
       table.string('class').notNullable().unique()
-      table.integer('name_locale_id').unsigned().references('locales.id').onDelete('CASCADE')
-      table.integer('recipe_id').unsigned().references('recipes.id').onDelete('CASCADE')
+      table.string('name_locale_key').notNullable()
+      table.integer('blueprint_id').notNullable().unsigned().references('blueprints.id')
+        .onDelete('CASCADE')
       table.string('icon').notNullable()
       table.integer('water_consumption').notNullable()
       table.integer('power').notNullable()

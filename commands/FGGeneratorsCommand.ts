@@ -12,6 +12,8 @@ export default class FGGeneratorsCommand extends BaseCommand {
   }
 
   public async run() {
+    this.ui.sticker().add('Generators').render()
+
     await FGGeneratorModel.parseDocsJson()
   }
 }

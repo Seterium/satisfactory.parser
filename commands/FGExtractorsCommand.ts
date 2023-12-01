@@ -1,5 +1,7 @@
 import { BaseCommand } from '@adonisjs/core/build/standalone'
 
+import { FGExtractorModel } from 'App/FGModels'
+
 export default class FGExtractorsCommand extends BaseCommand {
   public static commandName = 'fg:extractors'
 
@@ -10,6 +12,8 @@ export default class FGExtractorsCommand extends BaseCommand {
   }
 
   public async run() {
-    this.logger.info('Hello world!')
+    this.ui.sticker().add('Extractors').render()
+
+    await FGExtractorModel.parseDocsJson()
   }
 }

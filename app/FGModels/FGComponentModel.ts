@@ -23,13 +23,13 @@ export class FGComponentModel extends FGAbstractModel {
 
     componentModel.class = this.docsJsonData.ClassName
     componentModel.type = this.docsJsonData.mForm as Component['type']
-    componentModel.nameLocaleId = await this.saveLocale(this.nameLocaleKey)
+    componentModel.nameLocaleKey = this.nameLocaleKey
     componentModel.icon = this.icon
     componentModel.sinkPoints = this.sinkPoints
 
     await componentModel.save()
 
-    consola.success(`Component with class ${chalk.bold.cyanBright(this.docsJsonData.ClassName)} saved`)
+    consola.success(`Component ${chalk.bold.cyanBright(this.docsJsonData.ClassName)} saved`)
   }
 
   static async parseDocsJson() {
@@ -38,6 +38,10 @@ export class FGComponentModel extends FGAbstractModel {
       'FGItemDescriptorBiomass',
       'FGItemDescriptorNuclearFuel',
       'FGResourceDescriptor',
+      'FGEquipmentDescriptor',
+      'FGConsumableDescriptor',
+      'FGAmmoTypeProjectile',
+      'FGAmmoTypeInstantHit',
     ])
 
     await this.truncate(Component)

@@ -12,6 +12,8 @@ export default class FGComponentsCommand extends BaseCommand {
   }
 
   public async run() {
+    this.ui.sticker().add('Components').render()
+
     await FGComponentModel.parseDocsJson()
   }
 }

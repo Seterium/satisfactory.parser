@@ -1,4 +1,5 @@
 import { BaseCommand } from '@adonisjs/core/build/standalone'
+import { FGRecipeModel } from 'App/FGModels'
 
 export default class FGRecipesCommand extends BaseCommand {
   public static commandName = 'fg:recipes'
@@ -10,6 +11,8 @@ export default class FGRecipesCommand extends BaseCommand {
   }
 
   public async run() {
-    this.logger.info('Hello world!')
+    this.ui.sticker().add('Recipes').render()
+
+    await FGRecipeModel.parseDocsJson()
   }
 }

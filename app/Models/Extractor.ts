@@ -1,14 +1,11 @@
 import {
   BaseModel,
   column,
-  HasMany,
-  hasMany,
-  hasOne,
   HasOne,
+  hasOne,
 } from '@ioc:Adonis/Lucid/Orm'
 
-import Locale from './Locale'
-import Recipe from './Recipe'
+import Blueprint from './Blueprint'
 
 export default class Extractor extends BaseModel {
   @column({ isPrimary: true })
@@ -21,20 +18,23 @@ export default class Extractor extends BaseModel {
   public class: string
 
   @column()
-  public nameLocale: string
+  public nameLocaleKey: string
 
   @column()
   public icon: string
 
   @column()
-  public energyConsumption: number
+  public blueprintId: number
 
   @column()
-  public energyExponent: number
+  public powerConsumption: number
 
-  @hasOne(() => Locale)
-  public name: HasOne<typeof Locale>
+  @column()
+  public powerExponent: number
 
-  @hasMany(() => Recipe)
-  public recipes: HasMany<typeof Recipe>
+  @column()
+  public extractionFactor: number
+
+  @hasOne(() => Blueprint)
+  public blueprint: HasOne<typeof Blueprint>
 }

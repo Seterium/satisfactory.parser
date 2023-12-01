@@ -1,5 +1,16 @@
 {
   "commands": {
+    "fg:all": {
+      "settings": {
+        "loadApp": true
+      },
+      "commandPath": "./commands/FGAllCommand",
+      "commandName": "fg:all",
+      "description": "",
+      "args": [],
+      "aliases": [],
+      "flags": []
+    },
     "fg:components": {
       "settings": {
         "loadApp": true
@@ -22,34 +33,12 @@
       "aliases": [],
       "flags": []
     },
-    "fg:fuels": {
-      "settings": {
-        "loadApp": true
-      },
-      "commandPath": "./commands/FGFuelsCommand",
-      "commandName": "fg:fuels",
-      "description": "",
-      "args": [],
-      "aliases": [],
-      "flags": []
-    },
     "fg:generators": {
       "settings": {
         "loadApp": true
       },
       "commandPath": "./commands/FGGeneratorsCommand",
       "commandName": "fg:generators",
-      "description": "",
-      "args": [],
-      "aliases": [],
-      "flags": []
-    },
-    "fg:locales": {
-      "settings": {
-        "loadApp": true
-      },
-      "commandPath": "./commands/FgLocalesCommand",
-      "commandName": "fg:locales",
       "description": "",
       "args": [],
       "aliases": [],

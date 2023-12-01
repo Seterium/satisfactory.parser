@@ -7,9 +7,8 @@ import {
   HasOne,
 } from '@ioc:Adonis/Lucid/Orm'
 
-import Locale from './Locale'
 import Fuel from './Fuel'
-import Recipe from './Recipe'
+import Blueprint from './Blueprint'
 
 export default class Generator extends BaseModel {
   @column({ isPrimary: true })
@@ -19,10 +18,10 @@ export default class Generator extends BaseModel {
   public class: string
 
   @column()
-  public nameLocaleId: number
+  public nameLocaleKey: string
 
   @column()
-  public recipeId: number
+  public blueprintId: number
 
   @column()
   public icon: string
@@ -33,12 +32,9 @@ export default class Generator extends BaseModel {
   @column()
   public waterConsumption: number
 
-  @hasOne(() => Locale)
-  public name: HasOne<typeof Locale>
-
   @hasMany(() => Fuel)
   public fuels: HasMany<typeof Fuel>
 
-  @hasOne(() => Recipe)
-  public recipe: HasOne<typeof Recipe>
+  @hasOne(() => Blueprint)
+  public blueprint: HasOne<typeof Blueprint>
 }

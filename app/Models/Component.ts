@@ -1,11 +1,7 @@
 import {
   BaseModel,
   column,
-  HasOne,
-  hasOne,
 } from '@ioc:Adonis/Lucid/Orm'
-
-import Locale from './Locale'
 
 export default class Component extends BaseModel {
   @column({ isPrimary: true })
@@ -15,7 +11,7 @@ export default class Component extends BaseModel {
   public class: string
 
   @column()
-  public nameLocaleId: number
+  public nameLocaleKey: string
 
   @column()
   public type: 'RF_SOLID' | 'RF_LIQUID' | 'RF_GAS'
@@ -25,7 +21,4 @@ export default class Component extends BaseModel {
 
   @column()
   public icon: string
-
-  @hasOne(() => Locale)
-  public name: HasOne<typeof Locale>
 }

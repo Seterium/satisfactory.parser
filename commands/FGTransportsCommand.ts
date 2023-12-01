@@ -1,5 +1,7 @@
 import { BaseCommand } from '@adonisjs/core/build/standalone'
 
+import { FGTransportModel } from 'App/FGModels'
+
 export default class FGTransportsCommand extends BaseCommand {
   public static commandName = 'fg:transports'
 
@@ -10,6 +12,8 @@ export default class FGTransportsCommand extends BaseCommand {
   }
 
   public async run() {
-    this.logger.info('Hello world!')
+    this.ui.sticker().add('Transports').render()
+
+    await FGTransportModel.parseDocsJson()
   }
 }

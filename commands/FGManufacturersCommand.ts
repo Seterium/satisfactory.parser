@@ -1,5 +1,7 @@
 import { BaseCommand } from '@adonisjs/core/build/standalone'
 
+import { FGManufacturerModel } from 'App/FGModels'
+
 export default class FGManufacturersCommand extends BaseCommand {
   public static commandName = 'fg:manufacturers'
 
@@ -10,6 +12,8 @@ export default class FGManufacturersCommand extends BaseCommand {
   }
 
   public async run() {
-    this.logger.info('Hello world!')
+    this.ui.sticker().add('Manufacturers').render()
+
+    await FGManufacturerModel.parseDocsJson()
   }
 }

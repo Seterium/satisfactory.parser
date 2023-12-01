@@ -1,4 +1,5 @@
 export * from './FGAbsctractModel'
+export * from './FGBlueprintModel'
 export * from './FGComponentModel'
 export * from './FGExtractorModel'
 export * from './FGGeneratorModel'
