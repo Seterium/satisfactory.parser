@@ -1,9 +1,6 @@
-import {
-  BaseModel,
-  column,
-  hasOne,
-  HasOne,
-} from '@ioc:Adonis/Lucid/Orm'
+import type { HasOne } from '@ioc:Adonis/Lucid/Orm'
+
+import { BaseModel, column, hasOne } from '@ioc:Adonis/Lucid/Orm'
 
 import Component from './Component'
 

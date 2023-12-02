@@ -105,7 +105,7 @@ export class FGRecipeModel extends FGAbstractModel {
     const manufacturerId = await this.getManufacturerId()
 
     model.class = this.className
-    model.nameLocaleKey = this.recipeNameLocale
+    model.nameLocaleId = await this.saveLocale(this.recipeNameLocale)
     model.isAlt = this.isAlt
     model.manufacturerId = manufacturerId
     model.powerConsumption = this.powerConsumption

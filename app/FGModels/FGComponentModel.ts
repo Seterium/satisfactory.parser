@@ -25,7 +25,7 @@ export class FGComponentModel extends FGAbstractModel {
 
     componentModel.class = this.className
     componentModel.type = this.descJsonData.mForm as Component['type']
-    componentModel.nameLocaleKey = this.descNameLocale
+    componentModel.nameLocaleId = await this.saveLocale(this.descNameLocale)
     componentModel.icon = this.icon
     componentModel.sinkPoints = this.sinkPoints
 

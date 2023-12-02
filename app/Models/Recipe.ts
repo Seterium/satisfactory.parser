@@ -1,12 +1,10 @@
-import {
-  BaseModel,
-  column,
-  HasMany,
-  hasMany,
-} from '@ioc:Adonis/Lucid/Orm'
+import type { HasMany, HasOne } from '@ioc:Adonis/Lucid/Orm'
+
+import { BaseModel, column, hasMany, hasOne } from '@ioc:Adonis/Lucid/Orm'
 
 import RecipeInput from './RecipeInput'
 import RecipeOutput from './RecipeOutput'
+import Locale from './Locale'
 
 export default class Recipe extends BaseModel {
   @column({ isPrimary: true })
@@ -16,7 +14,7 @@ export default class Recipe extends BaseModel {
   public class: string
 
   @column()
-  public nameLocaleKey: string | null
+  public nameLocaleId: number
 
   @column()
   public isAlt: boolean
@@ -35,4 +33,7 @@ export default class Recipe extends BaseModel {
 
   @hasMany(() => RecipeOutput)
   public outputs: HasMany<typeof RecipeOutput>
+
+  @hasOne(() => Locale)
+  public name: HasOne<typeof Locale>
 }

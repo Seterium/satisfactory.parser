@@ -15,7 +15,7 @@ export class FGManufacturerModel extends FGAbstractModel {
     const model = new Manufacturer()
 
     model.class = this.className
-    model.nameLocaleKey = this.buildNameLocale
+    model.nameLocaleId = await this.saveLocale(this.buildNameLocale)
     model.blueprintId = await this.saveBlueprint()
     model.powerConsumption = this.powerConsumption
     model.powerExponent = this.buildJsonData.mPowerConsumptionExponent

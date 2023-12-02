@@ -18,12 +18,10 @@ export class FGExtractorModel extends FGAbstractModel {
   async save() {
     const model = new Extractor()
 
-    const blueprintId = await this.saveBlueprint()
-
     model.class = this.className
-    model.nameLocaleKey = this.buildNameLocale
+    model.nameLocaleId = await this.saveLocale(this.buildNameLocale)
     model.icon = this.icon
-    model.blueprintId = blueprintId
+    model.blueprintId = await this.saveBlueprint()
     model.powerConsumption = this.powerConsumption
     model.powerExponent = this.buildJsonData.mPowerConsumptionExponent
     model.extractionFactor = this.extractionFactor

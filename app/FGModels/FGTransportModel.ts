@@ -21,7 +21,7 @@ export class FGTransportModel extends FGAbstractModel {
     const blueprintId = await this.saveBlueprint()
 
     model.class = this.className
-    model.nameLocaleKey = this.buildNameLocale
+    model.nameLocaleId = await this.saveLocale(this.buildNameLocale)
     model.blueprintId = blueprintId
     model.icon = this.icon
     model.speed = this.speed

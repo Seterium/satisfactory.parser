@@ -44,6 +44,17 @@
       "aliases": [],
       "flags": []
     },
+    "fg:locales": {
+      "settings": {
+        "loadApp": true
+      },
+      "commandPath": "./commands/FGLocalesCommand",
+      "commandName": "fg:locales",
+      "description": "",
+      "args": [],
+      "aliases": [],
+      "flags": []
+    },
     "fg:manufacturers": {
       "settings": {
         "loadApp": true

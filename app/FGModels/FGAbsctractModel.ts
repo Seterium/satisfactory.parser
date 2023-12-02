@@ -23,6 +23,7 @@ import { FGBlueprintModel } from 'App/FGModels'
 import chalk from 'chalk'
 import consola from 'consola'
 import { globSync } from 'glob'
+import Locale from 'App/Models/Locale'
 
 type FGOrmModels = typeof Component
   | typeof Extractor
@@ -413,6 +414,23 @@ export abstract class FGAbstractModel {
     const blueprintId = await blueprintModel.save()
 
     return blueprintId
+  }
+
+  protected async saveLocale(localeKey: string): Promise<number> {
+    const existedModel = await Locale.findBy('key', localeKey)
+
+    if (existedModel) {
+      return existedModel.id
+    }
+
+    const model = new Locale()
+
+    model.key = localeKey
+    model.value = ''
+
+    await model.save()
+
+    return model.id
   }
 
   protected static async truncate(model: FGOrmModels) {

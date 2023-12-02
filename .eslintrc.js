@@ -27,6 +27,8 @@ module.exports = {
 
     'prefer-destructuring': 0,
 
+    'object-curly-newline': 0,
+
     // Предупреждение о неиспользуемых переменных
     'no-unused-vars': 0,
     '@typescript-eslint/no-unused-vars': 0,

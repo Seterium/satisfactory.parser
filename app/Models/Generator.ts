@@ -1,14 +1,10 @@
-import {
-  BaseModel,
-  column,
-  HasMany,
-  hasMany,
-  hasOne,
-  HasOne,
-} from '@ioc:Adonis/Lucid/Orm'
+import type { HasOne, HasMany } from '@ioc:Adonis/Lucid/Orm'
+
+import { BaseModel, column, hasOne, hasMany } from '@ioc:Adonis/Lucid/Orm'
 
 import Fuel from './Fuel'
 import Blueprint from './Blueprint'
+import Locale from './Locale'
 
 export default class Generator extends BaseModel {
   @column({ isPrimary: true })
@@ -18,7 +14,7 @@ export default class Generator extends BaseModel {
   public class: string
 
   @column()
-  public nameLocaleKey: string
+  public nameLocaleId: number
 
   @column()
   public blueprintId: number
@@ -37,4 +33,7 @@ export default class Generator extends BaseModel {
 
   @hasOne(() => Blueprint)
   public blueprint: HasOne<typeof Blueprint>
+
+  @hasOne(() => Locale)
+  public name: HasOne<typeof Locale>
 }

@@ -130,7 +130,7 @@ export class FGGeneratorModel extends FGAbstractModel {
     const model = new Generator()
 
     model.class = this.className
-    model.nameLocaleKey = this.buildNameLocale
+    model.nameLocaleId = await this.saveLocale(this.buildNameLocale)
     model.blueprintId = await this.saveBlueprint()
     model.icon = this.icon
     model.power = this.power

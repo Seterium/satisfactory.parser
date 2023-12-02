@@ -1,10 +1,9 @@
-import {
-  BaseModel,
-  column,
-  HasOne,
-  hasOne,
-} from '@ioc:Adonis/Lucid/Orm'
+import type { HasOne } from '@ioc:Adonis/Lucid/Orm'
+
+import { BaseModel, column, hasOne } from '@ioc:Adonis/Lucid/Orm'
+
 import Blueprint from './Blueprint'
+import Locale from './Locale'
 
 export default class Transport extends BaseModel {
   @column({ isPrimary: true })
@@ -14,7 +13,7 @@ export default class Transport extends BaseModel {
   public class: string
 
   @column()
-  public nameLocaleKey: string
+  public nameLocaleId: number
 
   @column()
   public blueprintId: number
@@ -27,4 +26,7 @@ export default class Transport extends BaseModel {
 
   @hasOne(() => Blueprint)
   public blueprint: HasOne<typeof Blueprint>
+
+  @hasOne(() => Locale)
+  public name: HasOne<typeof Locale>
 }
