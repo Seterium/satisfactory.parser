@@ -25,6 +25,8 @@ module.exports = {
       SwitchCase: 1,
     }],
 
+    'prefer-destructuring': 0,
+
     // Предупреждение о неиспользуемых переменных
     'no-unused-vars': 0,
     '@typescript-eslint/no-unused-vars': 0,

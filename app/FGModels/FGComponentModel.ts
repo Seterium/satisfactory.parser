@@ -9,6 +9,10 @@ export class FGComponentModel extends FGAbstractModel {
   baseModel = Component
 
   private get sinkPoints(): number {
+    if (this.docsJsonData.mForm === 'RF_LIQUID') {
+      return 0
+    }
+
     const pointsString = this.docsJsonData.mResourceSinkPoints
 
     if (typeof pointsString !== 'string') {

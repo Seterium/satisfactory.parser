@@ -55,6 +55,29 @@
       "aliases": [],
       "flags": []
     },
+    "fgp:power": {
+      "settings": {
+        "loadApp": true
+      },
+      "commandPath": "./commands/FGPPowerCommand",
+      "commandName": "fgp:power",
+      "description": "",
+      "args": [],
+      "aliases": [],
+      "flags": []
+    },
+    "fgp:production": {
+      "settings": {
+        "loadApp": false,
+        "stayAlive": false
+      },
+      "commandPath": "./commands/FGProductionCommand",
+      "commandName": "fgp:production",
+      "description": "",
+      "args": [],
+      "aliases": [],
+      "flags": []
+    },
     "fg:recipes": {
       "settings": {
         "loadApp": true
