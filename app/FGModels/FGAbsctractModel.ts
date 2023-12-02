@@ -18,6 +18,8 @@ import RecipeInput from 'App/Models/RecipeInput'
 import RecipeOutput from 'App/Models/RecipeOutput'
 import Transport from 'App/Models/Transport'
 
+import { FGBlueprintModel } from 'App/FGModels'
+
 import chalk from 'chalk'
 import consola from 'consola'
 import { globSync } from 'glob'
@@ -50,6 +52,10 @@ interface FGModelOptions {
   loadRecipeFModelData?: boolean
 }
 
+const RECIPES_CLASSES_MAP = {
+  FoundryMk1: 'SmelterMk1',
+}
+
 export abstract class FGAbstractModel {
   protected type: DocsJsonType
 
@@ -65,7 +71,7 @@ export abstract class FGAbstractModel {
 
   protected buildFModelData: Record<string, any>[] = []
 
-  constructor(docsJsonData: Record<string, any>, type: DocsJsonType, options: FGModelOptions) {
+  constructor(docsJsonData: Record<string, any>, type: DocsJsonType, options: FGModelOptions = {}) {
     this.type = type
 
     switch (type) {
@@ -142,7 +148,7 @@ export abstract class FGAbstractModel {
     }
 
     if (type === 'recipe') {
-      const value = this.buildJsonData.ClassName
+      const value = this.recipeJsonData.ClassName
 
       if (typeof value !== 'string') {
         throw new Error(`Could not find ClassName property in ${type} json data`)
@@ -164,7 +170,9 @@ export abstract class FGAbstractModel {
         throw new Error(`Could not find ClassName property in ${type} json data`)
       }
 
-      return value.slice(0, -2).substring(5)
+      return this.isBP
+        ? value.slice(0, -2).substring(3)
+        : value.slice(0, -2).substring(5)
     }
 
     if (type === 'build') {
@@ -178,7 +186,7 @@ export abstract class FGAbstractModel {
     }
 
     if (type === 'recipe') {
-      const value = this.buildJsonData.ClassName
+      const value = this.recipeJsonData.ClassName
 
       if (typeof value !== 'string') {
         throw new Error(`Could not find ClassName property in ${type} json data`)
@@ -195,35 +203,78 @@ export abstract class FGAbstractModel {
   }
 
   protected get descNameLocale(): string {
-    return ''
+    const value = this.descFModelData.find((data) => {
+      return data.Properties?.mDisplayName?.Key
+    })?.Properties?.mDisplayName?.Key
+
+    if (value === undefined) {
+      throw new Error(`Could not find mDisplayName in ${this.className} descFModelData`)
+    }
+
+    return value
   }
 
   protected get buildNameLocale(): string {
-    return ''
+    const value = this.buildFModelData.find((data) => {
+      return data.Properties?.mDisplayName?.Key
+    })?.Properties?.mDisplayName?.Key
+
+    if (value === undefined) {
+      throw new Error(`Could not find mDisplayName in ${this.className} buildFModelData`)
+    }
+
+    return value
   }
 
   protected get recipeNameLocale(): string {
-    return ''
+    const value = this.recipeFModelData.find((data) => {
+      return data.Properties?.mDisplayName?.Key
+    })?.Properties?.mDisplayName?.Key
+
+    return value ?? ''
   }
 
   protected get icon(): string {
-    return ''
+    if (this.descFModelData.length === 0) {
+      throw new Error('descFModelData not loaded')
+    }
+
+    const iconPath = this.descFModelData.find((fmodelData) => {
+      return fmodelData.Properties?.mPersistentBigIcon?.ObjectPath
+    })?.Properties?.mPersistentBigIcon?.ObjectPath
+
+    if (typeof iconPath !== 'string') {
+      throw new Error(`Could not find icon in ${this.className} desc`)
+    }
+
+    return iconPath.replace('.0', '')
   }
 
   protected getDescJsonData(): Record<string, any> {
-    return {}
-    // 'FGItemDescriptor',
-    // 'FGBuildingDescriptor',
-    // 'FGResourceDescriptor',
-    // 'FGPoleDescriptor',
-    // 'FGEquipmentDescriptor',
-    // 'FGItemDescriptorBiomass',
-    // 'FGItemDescriptorNuclearFuel',
-    // 'FGVehicleDescriptor',
-    // 'FGConsumableDescriptor',
-    // 'FGAmmoTypeProjectile',
-    // 'FGAmmoTypeSpreadshot',
-    // 'FGAmmoTypeInstantHit'
+    const docsJson = FGAbstractModel.getDocsJsonDescriptors([
+      'FGItemDescriptor',
+      'FGBuildingDescriptor',
+      'FGResourceDescriptor',
+      'FGPoleDescriptor',
+      'FGEquipmentDescriptor',
+      'FGItemDescriptorBiomass',
+      'FGItemDescriptorNuclearFuel',
+      'FGVehicleDescriptor',
+      'FGConsumableDescriptor',
+      'FGAmmoTypeProjectile',
+      'FGAmmoTypeSpreadshot',
+      'FGAmmoTypeInstantHit',
+    ])
+
+    const value = docsJson.find(({ ClassName }) => {
+      return ClassName === `Desc_${this.cleanedClassName}_C`
+    })
+
+    if (value === undefined) {
+      throw new Error(`Could not find Desc_${this.className}_C class`)
+    }
+
+    return value
   }
 
   protected getDescFModelData() {
@@ -327,8 +378,21 @@ export abstract class FGAbstractModel {
   }
 
   protected getRecipeJsonData(): Record<string, any> {
-    return {}
-    // FGRecipe
+    const docsJson = FGAbstractModel.getDocsJsonDescriptors([
+      'FGRecipe',
+    ])
+
+    const recipeClass = RECIPES_CLASSES_MAP[this.cleanedClassName] ?? this.cleanedClassName
+
+    const value = docsJson.find(({ ClassName }) => {
+      return ClassName === `Recipe_${recipeClass}_C`
+    })
+
+    if (value === undefined) {
+      throw new Error(`Could not find Recipe_${this.className}_C class`)
+    }
+
+    return value
   }
 
   protected getRecipeFModelData() {
@@ -341,6 +405,14 @@ export abstract class FGAbstractModel {
     const fmodelData: Record<string, any>[] = JSON.parse(fs.readFileSync(filepath).toString())
 
     return fmodelData
+  }
+
+  protected async saveBlueprint() {
+    const blueprintModel = new FGBlueprintModel(this.recipeJsonData)
+
+    const blueprintId = await blueprintModel.save()
+
+    return blueprintId
   }
 
   protected static async truncate(model: FGOrmModels) {

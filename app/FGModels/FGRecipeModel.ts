@@ -21,66 +21,33 @@ const EXCLUDED_MANUFACTURERS = [
 ]
 
 export class FGRecipeModel extends FGAbstractModel {
-  private recipeFModelData: Record<string, any>[]
-
-  private skip: boolean = false
-
-  constructor(recipeJsonData: Record<string, any>) {
-    super(recipeJsonData, false)
-
-    if (this.manufacturerClassName === '' || EXCLUDED_MANUFACTURERS.includes(this.manufacturerClassName)) {
-      this.skip = true
-    } else {
-      this.recipeFModelData = this.getFModelRecipeDesc()
-    }
-  }
-
-  protected get nameLocaleKey() {
-    if (this.isAlt === false) {
-      return ''
-    }
-
-    const recipeDataWithDisplayNameProperty = this.recipeFModelData.find((recipeData) => {
-      const type = `Recipe_${this.cleanedClassName}_C`
-
-      return recipeData?.Type === type
-        && recipeData?.Properties?.mDisplayName?.Key
-    })
-
-    if (recipeDataWithDisplayNameProperty === undefined) {
-      throw new Error(`Could not find mDisplayName prop in ${this.docsJsonData.ClassName} FModel desc`)
-    }
-
-    return recipeDataWithDisplayNameProperty.Properties.mDisplayName.Key
-  }
-
   private get inputResources() {
-    return parseRecipeString(this.docsJsonData.mIngredients)
+    return parseRecipeString(this.recipeJsonData.mIngredients)
   }
 
   private get outputProducts() {
-    return parseRecipeString(this.docsJsonData.mProduct)
+    return parseRecipeString(this.recipeJsonData.mProduct)
   }
 
   private get powerConsumption() {
-    const value = parseInt(this.docsJsonData.mVariablePowerConsumptionFactor, 10)
+    const value = parseInt(this.recipeJsonData.mVariablePowerConsumptionFactor, 10)
 
     return value === 1 ? 0 : value
   }
 
   private get duration() {
-    return parseInt(this.docsJsonData.mManufactoringDuration, 10)
+    return parseInt(this.recipeJsonData.mManufactoringDuration, 10)
   }
 
   private get isAlt() {
-    return this.docsJsonData.ClassName.startsWith('Recipe_Alternate_')
+    return this.recipeJsonData.ClassName.startsWith('Recipe_Alternate_')
   }
 
   private get manufacturerClassName() {
-    const manufacturerClassName = trim(this.docsJsonData.mProducedIn, '()"').split('.').pop()
+    const manufacturerClassName = trim(this.recipeJsonData.mProducedIn, '()"').split('.').pop()
 
     if (manufacturerClassName === undefined) {
-      throw new Error(`Could not parse mProducedIn property in class ${this.docsJsonData.ClassName}`)
+      throw new Error(`Could not parse mProducedIn property in class ${this.cleanedClassName}`)
     }
 
     return manufacturerClassName
@@ -133,16 +100,12 @@ export class FGRecipeModel extends FGAbstractModel {
   }
 
   async save() {
-    if (this.skip) {
-      return
-    }
-
     const model = new Recipe()
 
     const manufacturerId = await this.getManufacturerId()
 
-    model.class = this.docsJsonData.ClassName
-    model.nameLocaleKey = this.nameLocaleKey
+    model.class = this.className
+    model.nameLocaleKey = this.recipeNameLocale
     model.isAlt = this.isAlt
     model.manufacturerId = manufacturerId
     model.powerConsumption = this.powerConsumption
@@ -153,7 +116,7 @@ export class FGRecipeModel extends FGAbstractModel {
     await this.saveInputResources(model.id)
     await this.saveOutputProducts(model.id)
 
-    consola.success(`Recipe ${chalk.bold.cyanBright(this.docsJsonData.ClassName)} saved`)
+    consola.success(`Recipe ${chalk.bold.cyanBright(this.className)} saved`)
   }
 
   static async parseDocsJson() {
@@ -164,9 +127,13 @@ export class FGRecipeModel extends FGAbstractModel {
     await FGRecipeModel.truncate(Recipe)
 
     for (const jsonData of jsonDataList) {
-      const model = new this(jsonData)
+      const manufacturerClassName = trim(jsonData.mProducedIn, '()"').split('.').pop()
 
-      await model.save()
+      if (manufacturerClassName && EXCLUDED_MANUFACTURERS.includes(manufacturerClassName) === false) {
+        const model = new this(jsonData, 'recipe')
+
+        await model.save()
+      }
     }
   }
 }

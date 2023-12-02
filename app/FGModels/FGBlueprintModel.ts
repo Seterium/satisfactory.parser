@@ -10,11 +10,11 @@ import { parseRecipeString } from 'App/Utils'
 
 export class FGBlueprintModel extends FGAbstractModel {
   constructor(blueprintJsonData: Record<string, any>) {
-    super(blueprintJsonData, false)
+    super(blueprintJsonData, 'recipe')
   }
 
   private get components() {
-    return parseRecipeString(this.docsJsonData.mIngredients)
+    return parseRecipeString(this.recipeJsonData.mIngredients)
   }
 
   async saveComponents(blueprintId: number) {
@@ -34,13 +34,13 @@ export class FGBlueprintModel extends FGAbstractModel {
   async save(): Promise<number> {
     const model = new Blueprint()
 
-    model.class = this.docsJsonData.ClassName
+    model.class = this.className
 
     await model.save()
 
     await this.saveComponents(model.id)
 
-    consola.success(`Blueprint ${chalk.bold.cyanBright(this.docsJsonData.ClassName)} saved`)
+    consola.success(`Blueprint ${chalk.bold.cyanBright(this.className)} saved`)
 
     return model.id
   }

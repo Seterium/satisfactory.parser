@@ -6,14 +6,12 @@ import chalk from 'chalk'
 import consola from 'consola'
 
 export class FGComponentModel extends FGAbstractModel {
-  baseModel = Component
-
   private get sinkPoints(): number {
-    if (this.docsJsonData.mForm === 'RF_LIQUID') {
+    if (this.descJsonData.mForm === 'RF_LIQUID') {
       return 0
     }
 
-    const pointsString = this.docsJsonData.mResourceSinkPoints
+    const pointsString = this.descJsonData.mResourceSinkPoints
 
     if (typeof pointsString !== 'string') {
       throw new Error(`Could not find mResourceSinkPoints in ${this.cleanedClassName} Docs.json data`)
@@ -25,15 +23,15 @@ export class FGComponentModel extends FGAbstractModel {
   async save() {
     const componentModel = new Component()
 
-    componentModel.class = this.docsJsonData.ClassName
-    componentModel.type = this.docsJsonData.mForm as Component['type']
-    componentModel.nameLocaleKey = this.nameLocaleKey
+    componentModel.class = this.className
+    componentModel.type = this.descJsonData.mForm as Component['type']
+    componentModel.nameLocaleKey = this.descNameLocale
     componentModel.icon = this.icon
     componentModel.sinkPoints = this.sinkPoints
 
     await componentModel.save()
 
-    consola.success(`Component ${chalk.bold.cyanBright(this.docsJsonData.ClassName)} saved`)
+    consola.success(`Component ${chalk.bold.cyanBright(this.className)} saved`)
   }
 
   static async parseDocsJson() {
@@ -51,7 +49,7 @@ export class FGComponentModel extends FGAbstractModel {
     await this.truncate(Component)
 
     for (const jsonData of jsonDataList) {
-      const model = new this(jsonData)
+      const model = new this(jsonData, 'desc')
 
       await model.save()
     }

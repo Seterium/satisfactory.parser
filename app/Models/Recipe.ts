@@ -16,7 +16,7 @@ export default class Recipe extends BaseModel {
   public class: string
 
   @column()
-  public nameLocaleKey: number | null
+  public nameLocaleKey: string | null
 
   @column()
   public isAlt: boolean

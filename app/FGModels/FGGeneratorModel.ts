@@ -1,4 +1,4 @@
-import { FGAbstractModel, FGBlueprintModel } from 'App/FGModels'
+import { FGAbstractModel } from 'App/FGModels'
 import Component from 'App/Models/Component'
 
 import Fuel from 'App/Models/Fuel'
@@ -18,63 +18,35 @@ interface FuelData {
 }
 
 export class FGGeneratorModel extends FGAbstractModel {
-  private buildDecs: Record<string, any>[]
-
   private fuelsDescs: Record<string, any>[]
-
-  private recipesDescs: Record<string, any>[]
 
   constructor(
     generatorJsonData: Record<string, any>,
     fuelsDescs: Record<string, any>[],
-    recipesDescs: Record<string, any>[],
   ) {
-    super(generatorJsonData)
-    this.buildDecs = this.getFModelBuildDesc()
-    this.fuelsDescs = fuelsDescs
-    this.recipesDescs = recipesDescs
-  }
-
-  protected get icon() {
-    const iconPath = this.fmodelData[1].Properties?.mPersistentBigIcon?.ObjectPath
-
-    if (typeof iconPath !== 'string') {
-      throw new Error(`Could not find icon for ${this.cleanedClassName}`)
-    }
-
-    return iconPath.replace('.0', '')
-  }
-
-  protected get nameLocaleKey() {
-    const buildDescWithDisplayNameProperty = this.buildDecs.find((buildDesc) => {
-      const type = `Build_${this.cleanedClassName}_C`
-
-      return buildDesc?.Type === type
-        && buildDesc?.Name === `Default__${type}`
-        && buildDesc?.Properties?.mDisplayName?.Key
+    super(generatorJsonData, 'build', {
+      loadRecipeJsonData: true,
+      loadDescJsonData: true,
+      loadDescFModelData: true,
     })
 
-    if (buildDescWithDisplayNameProperty === undefined) {
-      throw new Error(`Could not find power value for ${this.cleanedClassName}`)
-    }
-
-    return buildDescWithDisplayNameProperty.Properties.mDisplayName.Key
+    this.fuelsDescs = fuelsDescs
   }
 
   private get power() {
-    const buildDescWithPowerProperty = this.buildDecs.find((buildDesc) => {
+    const value = this.buildFModelData.find((data) => {
       const type = `Build_${this.cleanedClassName}_C`
 
-      return buildDesc?.Type === type
-        && buildDesc?.Name === `Default__${type}`
-        && buildDesc?.Properties?.mPowerProduction
-    })
+      return data?.Type === type
+        && data?.Name === `Default__${type}`
+        && data?.Properties?.mPowerProduction
+    })?.Properties.mPowerProduction
 
-    if (buildDescWithPowerProperty === undefined) {
+    if (value === undefined) {
       throw new Error(`Could not find power value for ${this.cleanedClassName}`)
     }
 
-    return buildDescWithPowerProperty.Properties.mPowerProduction
+    return value
   }
 
   private get waterConsumption() {
@@ -83,7 +55,7 @@ export class FGGeneratorModel extends FGAbstractModel {
       mSupplementalLoadAmount,
       mSupplementalToPowerRatio,
       mPowerProduction,
-    } = this.docsJsonData
+    } = this.buildJsonData
 
     if (mRequiresSupplementalResource === 'False') {
       return 0
@@ -99,7 +71,7 @@ export class FGGeneratorModel extends FGAbstractModel {
   }
 
   private get fuels(): FuelData[] {
-    if (this.docsJsonData.mFuel[0].mFuelClass.startsWith('FG')) {
+    if (this.buildJsonData.mFuel[0].mFuelClass.startsWith('FG')) {
       return this.fuelsDescs.filter(({ NativeClass }) => NativeClass === 'FGItemDescriptorBiomass').map((fuel) => ({
         fuel: fuel.ClassName,
         supplemental: null,
@@ -108,7 +80,7 @@ export class FGGeneratorModel extends FGAbstractModel {
       }))
     }
 
-    return this.docsJsonData.mFuel.map((fuelData) => ({
+    return this.buildJsonData.mFuel.map((fuelData) => ({
       fuel: fuelData.mFuelClass,
       supplemental: fuelData.mSupplementalResourceClass ?? null,
       waste: fuelData.mByproduct ?? null,
@@ -154,25 +126,11 @@ export class FGGeneratorModel extends FGAbstractModel {
     }
   }
 
-  private async saveBlueprint() {
-    const blueprintJsonData = this.recipesDescs.find(({ ClassName }) => ClassName === `Recipe_${this.cleanedClassName}_C`)
-
-    if (blueprintJsonData === undefined) {
-      throw new Error(`Could not find recipe for ${this.docsJsonData.ClassName}`)
-    }
-
-    const blueprintModel = new FGBlueprintModel(blueprintJsonData)
-
-    const blueprintId = await blueprintModel.save()
-
-    return blueprintId
-  }
-
   async save() {
     const model = new Generator()
 
-    model.class = this.docsJsonData.ClassName
-    model.nameLocaleKey = this.nameLocaleKey
+    model.class = this.className
+    model.nameLocaleKey = this.buildNameLocale
     model.blueprintId = await this.saveBlueprint()
     model.icon = this.icon
     model.power = this.power
@@ -182,7 +140,7 @@ export class FGGeneratorModel extends FGAbstractModel {
 
     await this.saveFuels(model.id)
 
-    consola.success(`Generator ${chalk.bold.cyanBright(this.docsJsonData.ClassName)} saved`)
+    consola.success(`Generator ${chalk.bold.cyanBright(this.className)} saved`)
   }
 
   static async truncateAll() {
@@ -191,12 +149,6 @@ export class FGGeneratorModel extends FGAbstractModel {
   }
 
   static async parseDocsJson() {
-    const isComponentsTableFilled = (await Component.all()).length === 0
-
-    if (isComponentsTableFilled) {
-      throw new Error('Components table is empty')
-    }
-
     const generatorsJsonData = FGGeneratorModel.getDocsJsonDescriptors([
       'FGBuildableGeneratorFuel',
       'FGBuildableGeneratorNuclear',
@@ -209,14 +161,10 @@ export class FGGeneratorModel extends FGAbstractModel {
       'FGItemDescriptor',
     ])
 
-    const recipesJsonData = FGGeneratorModel.getDocsJsonDescriptors([
-      'FGRecipe',
-    ])
-
     await FGGeneratorModel.truncateAll()
 
     for (const generatorJsonData of generatorsJsonData) {
-      const model = new this(generatorJsonData, fuelsJsonData, recipesJsonData)
+      const model = new this(generatorJsonData, fuelsJsonData)
 
       await model.save()
     }
