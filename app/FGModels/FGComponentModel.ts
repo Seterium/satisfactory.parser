@@ -23,7 +23,7 @@ export class FGComponentModel extends FGAbstractModel {
   async save() {
     const componentModel = new Component()
 
-    componentModel.class = this.className
+    componentModel.class = this.cleanedClassName
     componentModel.type = this.descJsonData.mForm as Component['type']
     componentModel.nameLocaleId = await this.saveLocale(this.descNameLocale)
     componentModel.icon = this.icon
@@ -31,7 +31,7 @@ export class FGComponentModel extends FGAbstractModel {
 
     await componentModel.save()
 
-    consola.success(`Component ${chalk.bold.cyanBright(this.className)} saved`)
+    consola.success(`Component ${chalk.bold.cyanBright(this.cleanedClassName)} saved`)
   }
 
   static async parseDocsJson() {

@@ -28,12 +28,21 @@ export default class Generator extends BaseModel {
   @column()
   public waterConsumption: number
 
-  @hasMany(() => Fuel)
+  @hasMany(() => Fuel, {
+    localKey: 'id',
+    foreignKey: 'generatorId',
+  })
   public fuels: HasMany<typeof Fuel>
 
-  @hasOne(() => Blueprint)
+  @hasOne(() => Blueprint, {
+    foreignKey: 'id',
+    localKey: 'blueprintId',
+  })
   public blueprint: HasOne<typeof Blueprint>
 
-  @hasOne(() => Locale)
+  @hasOne(() => Locale, {
+    foreignKey: 'id',
+    localKey: 'nameLocaleId',
+  })
   public name: HasOne<typeof Locale>
 }

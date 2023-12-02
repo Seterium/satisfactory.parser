@@ -8,7 +8,7 @@ export default class extends BaseSchema {
       table.increments('id').primary()
       table.integer('generator_id').notNullable().unsigned().references('generators.id')
         .onDelete('CASCADE')
-      table.integer('fuel_id').notNullable().unsigned().references('components.id')
+      table.integer('component_id').notNullable().unsigned().references('components.id')
         .onDelete('CASCADE')
       table.integer('waste_id').nullable().unsigned().references('components.id')
         .onDelete('CASCADE')

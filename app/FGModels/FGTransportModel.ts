@@ -20,7 +20,7 @@ export class FGTransportModel extends FGAbstractModel {
 
     const blueprintId = await this.saveBlueprint()
 
-    model.class = this.className
+    model.class = this.cleanedClassName
     model.nameLocaleId = await this.saveLocale(this.buildNameLocale)
     model.blueprintId = blueprintId
     model.icon = this.icon
@@ -28,7 +28,7 @@ export class FGTransportModel extends FGAbstractModel {
 
     await model.save()
 
-    consola.success(`Transport ${chalk.bold.cyanBright(this.className)} saved`)
+    consola.success(`Transport ${chalk.bold.cyanBright(this.cleanedClassName)} saved`)
   }
 
   static async parseDocsJson() {

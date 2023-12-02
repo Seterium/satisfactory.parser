@@ -1,4 +1,5 @@
 import { BaseCommand } from '@adonisjs/core/build/standalone'
+import PowerPlanner from 'App/Services/PowerPlanner'
 
 export default class FGPPower extends BaseCommand {
   public static commandName = 'fgp:power'
@@ -10,6 +11,8 @@ export default class FGPPower extends BaseCommand {
   }
 
   public async run() {
-    this.logger.info('Hello world!')
+    const generator = new PowerPlanner()
+
+    await generator.generate()
   }
 }

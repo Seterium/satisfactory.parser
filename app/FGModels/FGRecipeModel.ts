@@ -8,7 +8,7 @@ import RecipeOutput from 'App/Models/RecipeOutput'
 import chalk from 'chalk'
 import consola from 'consola'
 import { trim } from 'lodash'
-import { parseRecipeString } from 'App/Utils'
+import { parseRecipeString, truncateClassName } from 'App/Utils'
 import Manufacturer from 'App/Models/Manufacturer'
 
 const EXCLUDED_MANUFACTURERS = [
@@ -50,7 +50,7 @@ export class FGRecipeModel extends FGAbstractModel {
       throw new Error(`Could not parse mProducedIn property in class ${this.cleanedClassName}`)
     }
 
-    return manufacturerClassName
+    return truncateClassName(manufacturerClassName)
   }
 
   private async getManufacturerId() {
@@ -104,7 +104,7 @@ export class FGRecipeModel extends FGAbstractModel {
 
     const manufacturerId = await this.getManufacturerId()
 
-    model.class = this.className
+    model.class = this.cleanedClassName
     model.nameLocaleId = await this.saveLocale(this.recipeNameLocale)
     model.isAlt = this.isAlt
     model.manufacturerId = manufacturerId
@@ -116,7 +116,7 @@ export class FGRecipeModel extends FGAbstractModel {
     await this.saveInputResources(model.id)
     await this.saveOutputProducts(model.id)
 
-    consola.success(`Recipe ${chalk.bold.cyanBright(this.className)} saved`)
+    consola.success(`Recipe ${chalk.bold.cyanBright(this.cleanedClassName)} saved`)
   }
 
   static async parseDocsJson() {

@@ -1,9 +1,7 @@
-import {
-  BaseModel,
-  column,
-  HasMany,
-  hasMany,
-} from '@ioc:Adonis/Lucid/Orm'
+import type { HasMany } from '@ioc:Adonis/Lucid/Orm'
+
+import { BaseModel, column, hasMany } from '@ioc:Adonis/Lucid/Orm'
+
 import BlueprintComponent from './BlueprintComponent'
 
 export default class Blueprint extends BaseModel {
@@ -13,6 +11,9 @@ export default class Blueprint extends BaseModel {
   @column()
   public class: string
 
-  @hasMany(() => BlueprintComponent)
+  @hasMany(() => BlueprintComponent, {
+    localKey: 'id',
+    foreignKey: 'blueprintId',
+  })
   public components: HasMany<typeof BlueprintComponent>
 }

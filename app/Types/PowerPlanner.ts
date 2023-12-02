@@ -1,22 +1,22 @@
-export namespace PowerPlanner {
+export namespace NPowerPlanner {
   /**
    * Структура датафайла приложения планировщика энергосистемы
    */
-  export interface Datafile {
+  export interface IDatafile {
     /**
      * Список генераторов, производящих энергию
      */
-    generators: Generator[]
+    generators: IGenerator[]
 
     /**
      * Словарь потредняемых видов топлива
      */
-    fuels: Fuel[]
+    fuels: IFuel[]
 
     /**
      * Словарь компонентов, используемых при постройке
      */
-    components: Component[]
+    components: IComponent[]
 
     /**
      * FG класс компонента воды
@@ -32,7 +32,7 @@ export namespace PowerPlanner {
   /**
    * Описание генератора
    */
-  export interface Generator {
+  export interface IGenerator {
     /**
      * Название
      */
@@ -56,7 +56,7 @@ export namespace PowerPlanner {
     /**
      * Список компонентов для постройки
      */
-    blueprint: BlueprintItem[]
+    blueprint: IBlueprintItem[]
 
     /**
      * Базовое потребление воды
@@ -66,13 +66,13 @@ export namespace PowerPlanner {
     /**
      * Список имен FG классов топлива
      */
-    fuels: Fuel['class'][]
+    fuels: IFuel['class'][]
   }
 
   /**
    * Описание топлива
    */
-  export interface Fuel {
+  export interface IFuel {
     /**
      * Название
      */
@@ -97,7 +97,7 @@ export namespace PowerPlanner {
   /**
    * Описание компонентов (для стоимости постройки)
    */
-  export interface Component {
+  export interface IComponent {
     /**
      * Название
      */
@@ -117,11 +117,11 @@ export namespace PowerPlanner {
   /**
    * Описание компонента для постройки
    */
-  export interface BlueprintItem {
+  export interface IBlueprintItem {
     /**
      * FG класс компонента
      */
-    component: Component['class']
+    component: IComponent['class']
 
     /**
      * Количество компонента

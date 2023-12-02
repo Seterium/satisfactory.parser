@@ -91,11 +91,6 @@ export abstract class FGAbstractModel {
         this.recipeFModelData = this.getRecipeFModelData()
         break
 
-        // case 'bp':
-        //   this.bpJsonData = docsJsonData
-        //   this.bpFModelData = this.getRecipeFModelData()
-        //   break
-
       default:
         break
     }
@@ -248,7 +243,7 @@ export abstract class FGAbstractModel {
       throw new Error(`Could not find icon in ${this.className} desc`)
     }
 
-    return iconPath.replace('.0', '')
+    return iconPath.replace('FactoryGame/Content/FactoryGame', '').replace('.0', '')
   }
 
   protected getDescJsonData(): Record<string, any> {

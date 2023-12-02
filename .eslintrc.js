@@ -29,6 +29,8 @@ module.exports = {
 
     'object-curly-newline': 0,
 
+    'import/no-cycle': 0,
+
     // Предупреждение о неиспользуемых переменных
     'no-unused-vars': 0,
     '@typescript-eslint/no-unused-vars': 0,

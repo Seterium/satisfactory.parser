@@ -34,13 +34,13 @@ export class FGBlueprintModel extends FGAbstractModel {
   async save(): Promise<number> {
     const model = new Blueprint()
 
-    model.class = this.className
+    model.class = this.cleanedClassName
 
     await model.save()
 
     await this.saveComponents(model.id)
 
-    consola.success(`Blueprint ${chalk.bold.cyanBright(this.className)} saved`)
+    consola.success(`Blueprint ${chalk.bold.cyanBright(this.cleanedClassName)} saved`)
 
     return model.id
   }

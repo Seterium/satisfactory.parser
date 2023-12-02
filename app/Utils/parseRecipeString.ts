@@ -1,3 +1,5 @@
+import { truncateClassName } from './truncateClassName'
+
 export function parseRecipeString(recipeString: string) {
   return recipeString.split('),').map((part) => {
     const [itemClass, amount] = part.replace(/\(|\)/g, '').split(',')
@@ -19,7 +21,7 @@ export function parseRecipeString(recipeString: string) {
     const parsedAmount = parseInt(amount?.split('=')?.pop() ?? '0', 10)
 
     return {
-      item: parsedItemClass,
+      item: truncateClassName(parsedItemClass),
       amount: parsedAmount,
     }
   })

@@ -14,7 +14,7 @@ export class FGManufacturerModel extends FGAbstractModel {
   async save() {
     const model = new Manufacturer()
 
-    model.class = this.className
+    model.class = this.cleanedClassName
     model.nameLocaleId = await this.saveLocale(this.buildNameLocale)
     model.blueprintId = await this.saveBlueprint()
     model.powerConsumption = this.powerConsumption
@@ -23,7 +23,7 @@ export class FGManufacturerModel extends FGAbstractModel {
 
     await model.save()
 
-    consola.success(`Manufacturer ${chalk.bold.cyanBright(this.className)} saved`)
+    consola.success(`Manufacturer ${chalk.bold.cyanBright(this.cleanedClassName)} saved`)
   }
 
   static async parseDocsJson() {

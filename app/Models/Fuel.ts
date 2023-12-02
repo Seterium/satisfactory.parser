@@ -12,7 +12,7 @@ export default class Fuel extends BaseModel {
   public generatorId: number
 
   @column()
-  public fuelId: number
+  public componentId: number
 
   @column()
   public wasteId: number | null
@@ -23,6 +23,15 @@ export default class Fuel extends BaseModel {
   @column()
   public energy: number
 
-  @hasOne(() => Component)
+  @hasOne(() => Component, {
+    foreignKey: 'id',
+    localKey: 'componentId',
+  })
   public component: HasOne<typeof Component>
+
+  @hasOne(() => Component, {
+    foreignKey: 'id',
+    localKey: 'wasteId',
+  })
+  public waste: HasOne<typeof Component>
 }

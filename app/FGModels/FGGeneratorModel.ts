@@ -3,12 +3,13 @@ import Component from 'App/Models/Component'
 
 import Fuel from 'App/Models/Fuel'
 import Generator from 'App/Models/Generator'
+import { truncateClassName } from 'App/Utils'
 
 import chalk from 'chalk'
 import consola from 'consola'
 
 interface FuelData {
-  fuel: string
+  component: string
 
   supplemental: string | null
 
@@ -73,7 +74,7 @@ export class FGGeneratorModel extends FGAbstractModel {
   private get fuels(): FuelData[] {
     if (this.buildJsonData.mFuel[0].mFuelClass.startsWith('FG')) {
       return this.fuelsDescs.filter(({ NativeClass }) => NativeClass === 'FGItemDescriptorBiomass').map((fuel) => ({
-        fuel: fuel.ClassName,
+        component: truncateClassName(fuel.ClassName),
         supplemental: null,
         waste: null,
         wasteAmount: 0,
@@ -81,7 +82,7 @@ export class FGGeneratorModel extends FGAbstractModel {
     }
 
     return this.buildJsonData.mFuel.map((fuelData) => ({
-      fuel: fuelData.mFuelClass,
+      component: truncateClassName(fuelData.mFuelClass),
       supplemental: fuelData.mSupplementalResourceClass ?? null,
       waste: fuelData.mByproduct ?? null,
       wasteAmount: fuelData.mByproductAmount ? parseInt(fuelData.mByproductAmount, 10) : 0,
@@ -96,25 +97,25 @@ export class FGGeneratorModel extends FGAbstractModel {
 
       fuelModel.generatorId = generatorId
 
-      const fuelItemModel = await Component.findByOrFail('class', fuelData.fuel)
+      const fuelItemModel = await Component.findByOrFail('class', fuelData.component)
 
-      const fuelItemJsonData = this.fuelsDescs.find(({ ClassName }) => ClassName === fuelData.fuel)
+      const fuelItemJsonData = this.fuelsDescs.find(({ ClassName }) => ClassName === `Desc_${fuelData.component}_C`)
 
       if (fuelItemJsonData === undefined) {
-        throw new Error(`Could not find ${fuelData.fuel} class desc`)
+        throw new Error(`Could not find ${fuelData.component} class desc`)
       }
 
-      fuelModel.fuelId = fuelItemModel.id
+      fuelModel.componentId = fuelItemModel.id
       fuelModel.energy = parseInt(fuelItemJsonData.mEnergyValue, 10)
 
       if (fuelData.waste && fuelData.wasteAmount) {
         const wasteJsonData = this.fuelsDescs.find(({ ClassName }) => ClassName === fuelData.waste)
 
         if (wasteJsonData === undefined) {
-          throw new Error(`Could not find ${fuelData.fuel} class desc`)
+          throw new Error(`Could not find ${fuelData.component} class desc`)
         }
 
-        const wasteItemModel = await Component.findByOrFail('class', fuelData.waste)
+        const wasteItemModel = await Component.findByOrFail('class', truncateClassName(fuelData.waste))
 
         fuelModel.wasteId = wasteItemModel.id
         fuelModel.wasteAmount = fuelData.wasteAmount
@@ -129,7 +130,7 @@ export class FGGeneratorModel extends FGAbstractModel {
   async save() {
     const model = new Generator()
 
-    model.class = this.className
+    model.class = this.cleanedClassName
     model.nameLocaleId = await this.saveLocale(this.buildNameLocale)
     model.blueprintId = await this.saveBlueprint()
     model.icon = this.icon
@@ -140,7 +141,7 @@ export class FGGeneratorModel extends FGAbstractModel {
 
     await this.saveFuels(model.id)
 
-    consola.success(`Generator ${chalk.bold.cyanBright(this.className)} saved`)
+    consola.success(`Generator ${chalk.bold.cyanBright(this.cleanedClassName)} saved`)
   }
 
   static async truncateAll() {

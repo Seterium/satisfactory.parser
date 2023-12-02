@@ -23,6 +23,9 @@ export default class Component extends BaseModel {
   @column()
   public icon: string
 
-  @hasOne(() => Locale)
+  @hasOne(() => Locale, {
+    foreignKey: 'id',
+    localKey: 'nameLocaleId',
+  })
   public name: HasOne<typeof Locale>
 }

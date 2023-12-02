@@ -18,7 +18,7 @@ export class FGExtractorModel extends FGAbstractModel {
   async save() {
     const model = new Extractor()
 
-    model.class = this.className
+    model.class = this.cleanedClassName
     model.nameLocaleId = await this.saveLocale(this.buildNameLocale)
     model.icon = this.icon
     model.blueprintId = await this.saveBlueprint()
@@ -28,7 +28,7 @@ export class FGExtractorModel extends FGAbstractModel {
 
     await model.save()
 
-    consola.success(`Extractor ${chalk.bold.cyanBright(this.className)} saved`)
+    consola.success(`Extractor ${chalk.bold.cyanBright(this.cleanedClassName)} saved`)
   }
 
   static async parseDocsJson() {
