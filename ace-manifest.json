@@ -75,7 +75,15 @@
       "description": "",
       "args": [],
       "aliases": [],
-      "flags": []
+      "flags": [
+        {
+          "name": "production",
+          "propertyName": "production",
+          "type": "boolean",
+          "alias": "prod",
+          "description": "Compress for production"
+        }
+      ]
     },
     "fgp:production": {
       "settings": {

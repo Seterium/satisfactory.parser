@@ -3,17 +3,16 @@ import type { NPowerPlanner } from 'App/Types'
 import fs from 'fs'
 import path from 'path'
 
-import Env from '@ioc:Adonis/Core/Env'
 import Application from '@ioc:Adonis/Core/Application'
 
 import Fuel from 'App/Models/Fuel'
 import Generator from 'App/Models/Generator'
 import Component from 'App/Models/Component'
 
-import md5 from 'md5'
 import chalk from 'chalk'
 import consola from 'consola'
 import { uniq } from 'lodash'
+import { saveIcon } from 'App/Utils'
 
 const WATER_CLASS = 'Water'
 const POWER_SHARD = 'CrystalShard'
@@ -21,9 +20,9 @@ const POWER_SHARD = 'CrystalShard'
 export default class PowerPlanner {
   private outputBaseDir = Application.publicPath('output/powerPlanner')
 
-  private imagesOutput = Application.publicPath('output/powerPlanner/images')
+  private iconsOutput = Application.publicPath('output/powerPlanner/images')
 
-  public async generate() {
+  public async generate(compress = false) {
     this.cleanOutput()
 
     const generators = await this.getGeneratorsData()
@@ -38,7 +37,11 @@ export default class PowerPlanner {
       powerShardClass: POWER_SHARD,
     }
 
-    fs.writeFileSync(path.join(this.outputBaseDir, 'powerPlanner.json'), JSON.stringify(datafile, null, 2))
+    const datafileContents = compress
+      ? JSON.stringify(datafile)
+      : JSON.stringify(datafile, null, 2)
+
+    fs.writeFileSync(path.join(this.outputBaseDir, 'powerPlanner.json'), datafileContents)
   }
 
   private cleanOutput() {
@@ -53,26 +56,9 @@ export default class PowerPlanner {
       recursive: true,
     })
 
-    fs.mkdirSync(this.imagesOutput, {
+    fs.mkdirSync(this.iconsOutput, {
       recursive: true,
     })
-  }
-
-  private async saveIcon(iconPath: string): Promise<string> {
-    const fullPath = path.join(Env.get('FG_FMODEL_EXPORTS_PATH'), `${iconPath}.png`)
-
-    if (fs.existsSync(fullPath) === false) {
-      throw new Error(`Could not find image: ${fullPath}`)
-    }
-
-    const filename = md5(fullPath)
-    const savePath = path.join(this.imagesOutput, `${filename}.png`)
-
-    fs.copyFileSync(fullPath, savePath)
-
-    consola.success(`Icon ${chalk.bold.cyanBright(iconPath)} saved ${chalk.bold.greenBright(savePath)}`)
-
-    return filename
   }
 
   private async getGeneratorsData(): Promise<NPowerPlanner.IGenerator[]> {
@@ -91,7 +77,7 @@ export default class PowerPlanner {
     const result = Promise.all(generators.map(async (generator) => ({
       name: generator.name.value,
       class: generator.class,
-      icon: await this.saveIcon(generator.icon),
+      icon: await saveIcon(generator.icon, this.iconsOutput, 128),
       power: generator.power,
       blueprint: generator.blueprint.components.map(({ component, amount }) => ({
         component: component.class,
@@ -119,7 +105,7 @@ export default class PowerPlanner {
       return {
         name: fuel.component.name.value,
         class: fuel.component.class,
-        icon: await this.saveIcon(fuel.component.icon),
+        icon: await saveIcon(fuel.component.icon, this.iconsOutput, 64),
         energy: fuel.component.type === 'RF_LIQUID' ? fuel.energy * 1000 : fuel.energy,
         waste: waste ? waste.class : undefined,
         wasteAmount: waste ? fuel.wasteAmount : undefined,
@@ -150,7 +136,7 @@ export default class PowerPlanner {
       return {
         name: component.name.value,
         class: component.class,
-        icon: await this.saveIcon(component.icon),
+        icon: await saveIcon(component.icon, this.iconsOutput, 64),
       }
     }))
 

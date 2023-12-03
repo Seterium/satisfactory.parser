@@ -1,4 +1,5 @@
-import { BaseCommand } from '@adonisjs/core/build/standalone'
+import { BaseCommand, flags } from '@adonisjs/core/build/standalone'
+
 import PowerPlanner from 'App/Services/PowerPlanner'
 
 export default class FGPPower extends BaseCommand {
@@ -10,9 +11,12 @@ export default class FGPPower extends BaseCommand {
     loadApp: true,
   }
 
+  @flags.boolean({ alias: 'prod', description: 'Compress for production' })
+  public production: boolean
+
   public async run() {
     const generator = new PowerPlanner()
 
-    await generator.generate()
+    await generator.generate(this.production)
   }
 }
